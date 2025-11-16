@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { InfoBlock, BlockType, blockTemplates } from "./types";
 import { InfoBlockEditor } from "./components/InfoBlockEditor";
 
@@ -35,6 +35,8 @@ export default function Home() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [copiedJapanese, setCopiedJapanese] = useState(false);
   const [copiedEnglish, setCopiedEnglish] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const translateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (!reply) {
@@ -42,6 +44,15 @@ export default function Home() {
       setCopiedEnglish(false);
     }
   }, [reply]);
+
+  // クリーンアップ: コンポーネントがアンマウントされた時にタイマーをクリア
+  useEffect(() => {
+    return () => {
+      if (translateTimeoutRef.current) {
+        clearTimeout(translateTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const disabledGenerate = useMemo(() => {
     return !customerText.trim() || generateLoading;
@@ -216,6 +227,51 @@ export default function Home() {
       setErrorMessage("コピーに失敗しました。手動で選択してください。");
     }
   }, [englishTranslation]);
+
+  const translateToEnglish = useCallback(async (japaneseText: string) => {
+    if (!japaneseText.trim()) {
+      setEnglishTranslation("");
+      return;
+    }
+
+    setIsTranslating(true);
+    try {
+      const response = await fetch("/api/mail", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "translate-to-english",
+          japaneseText: japaneseText,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("翻訳に失敗しました");
+      }
+
+      const data = await response.json();
+      setEnglishTranslation(data.translatedText || "");
+    } catch (error) {
+      console.error("自動翻訳エラー:", error);
+      // エラーは無視（ユーザーに表示しない）
+    } finally {
+      setIsTranslating(false);
+    }
+  }, []);
+
+  const handleReplyChange = useCallback((value: string) => {
+    setReply(value);
+
+    // 既存のタイマーをクリア
+    if (translateTimeoutRef.current) {
+      clearTimeout(translateTimeoutRef.current);
+    }
+
+    // 1秒後に自動翻訳を実行
+    translateTimeoutRef.current = setTimeout(() => {
+      translateToEnglish(value);
+    }, 1000);
+  }, [translateToEnglish]);
 
   return (
     <div className="min-h-screen bg-slate-100 py-10">
@@ -427,13 +483,17 @@ export default function Home() {
               {copiedJapanese ? "コピー済み" : "コピー"}
             </button>
           </div>
-          <div className="min-h-[180px] rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm leading-relaxed text-slate-800">
-            {reply ? (
-              <p className="whitespace-pre-wrap">{reply}</p>
-            ) : (
-              <p className="text-slate-400">
-                返信文がここに表示されます。口調・文章量を調整して生成ボタンを押してください。
-              </p>
+          <div className="relative">
+            <textarea
+              value={reply}
+              onChange={(e) => handleReplyChange(e.target.value)}
+              placeholder="返信文がここに表示されます。口調・文章量を調整して生成ボタンを押してください。"
+              className="min-h-[180px] w-full rounded-2xl border border-slate-200 bg-white p-5 text-sm leading-relaxed text-slate-800 outline-none ring-slate-300 transition focus:ring"
+            />
+            {isTranslating && (
+              <div className="absolute bottom-3 right-3 text-xs text-slate-500">
+                翻訳中...
+              </div>
             )}
           </div>
 

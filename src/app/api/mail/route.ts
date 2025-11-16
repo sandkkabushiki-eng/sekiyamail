@@ -15,7 +15,7 @@ const blockFieldSchema = z.object({
 
 const infoBlockSchema = z.object({
   id: z.string(),
-  type: z.enum(["breakfast", "dinner", "transfer", "checkin", "massage", "spa", "cake", "service", "decoration", "meal_add", "lunch", "facility", "other"]),
+  type: z.enum(["breakfast", "dinner", "transfer", "checkin", "massage", "spa", "cake", "service", "decoration", "meal_add", "lunch", "facility", "bar", "other"]),
   title: z.string().optional(),
   fields: z.array(blockFieldSchema),
 });
@@ -24,6 +24,10 @@ const schema = z.discriminatedUnion("action", [
   z.object({
     action: z.literal("translate"),
     customerText: z.string().min(1, "customerText is required"),
+  }),
+  z.object({
+    action: z.literal("translate-to-english"),
+    japaneseText: z.string().min(1, "japaneseText is required"),
   }),
   z.object({
     action: z.literal("generate"),
@@ -67,6 +71,7 @@ const blockLabels: Record<string, string> = {
   meal_add: "食事追加",
   lunch: "ランチ",
   facility: "施設利用",
+  bar: "Bar",
   other: "その他",
 };
 
@@ -168,6 +173,29 @@ export async function POST(request: NextRequest) {
           { status: 502 },
         );
       }
+    }
+
+    if (payload.action === "translate-to-english") {
+      const response = await openai.chat.completions.create({
+        model: process.env.OPENAI_MODEL_TRANSLATE ?? "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are a professional translator. Translate the following Japanese business email reply into natural, professional English. Maintain the same tone and formality level. Output only the translated text without any explanations.",
+          },
+          {
+            role: "user",
+            content: `Translate this Japanese business email reply into English:\n\n${payload.japaneseText}`,
+          },
+        ],
+      });
+
+      const translatedText = response.choices[0]?.message?.content?.trim() ?? "";
+
+      return NextResponse.json({
+        translatedText: translatedText,
+      });
     }
 
     const baseText = payload.translatedCustomerText?.trim()

@@ -345,6 +345,15 @@ export const blockPresets: Record<BlockType, PresetOption[]> = {
       },
     },
   ],
+  bar: [
+    {
+      label: "Bar（標準）",
+      values: {
+        時間: "カフェは、12:00-16:00、バーは16:00-22:30(LO)閉店23:00",
+        備考: "",
+      },
+    },
+  ],
   other: [],
 };
 

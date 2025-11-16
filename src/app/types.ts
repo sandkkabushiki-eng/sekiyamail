@@ -1,4 +1,4 @@
-export type BlockType = "breakfast" | "dinner" | "transfer" | "checkin" | "massage" | "spa" | "cake" | "service" | "decoration" | "meal_add" | "lunch" | "facility" | "other";
+export type BlockType = "breakfast" | "dinner" | "transfer" | "checkin" | "massage" | "spa" | "cake" | "service" | "decoration" | "meal_add" | "lunch" | "facility" | "bar" | "other";
 
 export interface BlockField {
   id: string;
@@ -122,6 +122,14 @@ export const blockTemplates: Record<
     defaultFields: [
       { label: "項目" },
       { label: "料金" },
+      { label: "備考" },
+    ],
+  },
+  bar: {
+    label: "Bar",
+    icon: "🍸",
+    defaultFields: [
+      { label: "時間" },
       { label: "備考" },
     ],
   },
