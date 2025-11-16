@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# メール返信文ジェネレーター
 
-## Getting Started
+お客様からのメールを翻訳し、口調とボリュームを調整した返信文を生成できるサポートツールです。
 
-First, run the development server:
+## 機能
+
+- お客様メールの自動翻訳（日本語以外の言語対応）
+- 情報ブロックによる構造化データ入力
+- プリセット機能による迅速な情報入力
+- 口調と文章量の調整
+- 日本語と英語の返信文を同時生成
+- 個別コピー機能
+
+## セットアップ
+
+### 環境変数
+
+`.env.local`ファイルを作成し、以下の環境変数を設定してください：
+
+```
+OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_MODEL_TRANSLATE=gpt-4o-mini
+OPENAI_MODEL_REPLY=gpt-4o-mini
+```
+
+### インストール
+
+```bash
+npm install
+```
+
+### 開発サーバー起動
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Vercelへのデプロイ
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. GitHubリポジトリにプッシュ
+2. Vercelダッシュボードでプロジェクトをインポート
+3. 環境変数 `OPENAI_API_KEY` を設定
+4. デプロイ
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 技術スタック
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS
+- OpenAI API
+- Zod
