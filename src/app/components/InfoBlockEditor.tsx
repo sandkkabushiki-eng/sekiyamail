@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { InfoBlock, BlockField, blockTemplates } from "../types";
 import { blockPresets, PresetOption } from "../presets";
 
@@ -19,28 +19,6 @@ export function InfoBlockEditor({
   const [selectedPresets, setSelectedPresets] = useState<Set<number>>(new Set());
   const [editingPresets, setEditingPresets] = useState<PresetOption[]>(blockPresets[block.type] || []);
   const [showEditMode, setShowEditMode] = useState(false);
-  const [initialized, setInitialized] = useState(false);
-
-  // 最初のプリセットを自動選択
-  useEffect(() => {
-    if (!initialized && editingPresets.length > 0 && selectedPresets.size === 0) {
-      const firstPresetIndex = 0;
-      setSelectedPresets(new Set([firstPresetIndex]));
-      
-      // 最初のプリセットの値を適用
-      const firstPreset = editingPresets[firstPresetIndex];
-      if (firstPreset) {
-        const mergedValues: Record<string, string> = { ...firstPreset.values };
-        const updatedFields = block.fields.map((field) => ({
-          ...field,
-          value: mergedValues[field.label] || field.value,
-        }));
-        onUpdate({ ...block, fields: updatedFields });
-      }
-      setInitialized(true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editingPresets.length, initialized]);
 
   const handleFieldChange = (fieldId: string, value: string) => {
     onUpdate({
