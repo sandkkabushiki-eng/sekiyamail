@@ -4,7 +4,6 @@ export interface BlockField {
   id: string;
   label: string;
   value: string;
-  includeInReply?: boolean; // 返信文に含めるかどうか（デフォルト: true）
 }
 
 export interface InfoBlock {
