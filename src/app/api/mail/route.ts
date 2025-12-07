@@ -2,11 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { z } from "zod";
 
-// Groq API (OpenAI互換)
-const client = new OpenAI({
-  apiKey: process.env.GROQ_API_KEY,
-  baseURL: "https://api.groq.com/openai/v1",
-});
+// Groq APIクライアントを遅延初期化（ビルド時にはAPIキーが不要）
+let client: OpenAI | null = null;
+
+function getClient(): OpenAI {
+  if (!client) {
+    client = new OpenAI({
+      apiKey: process.env.GROQ_API_KEY || "",
+      baseURL: "https://api.groq.com/openai/v1",
+    });
+  }
+  return client;
+}
 
 const blockFieldSchema = z.object({
   id: z.string(),
@@ -87,11 +94,11 @@ function formatInfoBlocks(blocks: z.infer<typeof infoBlockSchema>[]): string {
   return "\n\n# 利用可能な情報（返信に使用すること）\n" + formatted;
 }
 
-function ensureClient() {
+function ensureClient(): OpenAI {
   if (!process.env.GROQ_API_KEY) {
     throw new Error("GROQ_API_KEY is not set");
   }
-  return client;
+  return getClient();
 }
 
 // Groqで使用するモデル (Llama 3.3 70B - 高品質・高速)
